@@ -3,12 +3,15 @@ PLY a script that monitors your clipboard and uses mpv to play playlists and vid
 
 # Install:
 Clone the repo:
+
 `git clone https://github.com/hakivvi/PLY`
 
-Install dependencies:
+Install dependencies
+
 `cd PLY && make install-deps`
 
 Install PLY:
+
 `make install`
 
 then copy URL of a youtube video or a URL of a playlist
