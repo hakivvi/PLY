@@ -4,7 +4,7 @@ PLY a script that monitors your clipboard and uses mpv to play playlists and vid
 # Install:
 Clone the repo:
 
-`git clone https://github.com/hakivvi/PLY`
+`git clone https://github.com/hakivvi/PLY.git`
 
 Install dependencies
 
