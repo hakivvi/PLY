@@ -10,10 +10,21 @@ Install dependencies
 
 `cd PLY && make install-deps`
 
-Install PLY:
+Install PLY (auto-start after booting):
 
 `make install`
 
-then copy URL of a youtube video or a URL of a playlist
+**OR Run PLY:**
+
+`make run`
+
+then:
+
+`ply-start` to start PLY
+
+`ply-stop` to stop PLY
+
 # Uninstall:
 `make uninstall`
+# Usage:
+run or install PLY then just copy URL of a youtube video / playlist
