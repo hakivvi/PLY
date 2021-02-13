@@ -1,0 +1,142 @@
+#!/bin/bash
+
+# this script will monitor your clipboard and search for any youtube.com or youtu.be URLS and play them
+# if nothing is playing at that time,  once the currently playing URL is done, it will play the newest copied URL
+
+# PLY will send a notification to the desktop when a new audio/video is started even if you are playing a playlist
+# thats the main raison why i created it in fact :P
+# there is lot of stdout and stderr rediretion cz i want the script to not print nothing at all
+# when it runs in the background, the output will just shows up and interrupt me even if the script is backgrounded
+
+# to play a youtube video ( in audio mode only, update $mvpargs for other options) just copy its URL
+# mpv already supports other platforms (Vimeo, Twitch, ..) just update what URL the script will allow [line 63]
+# i only use Youtube thats why i dint include other platforms
+
+# TODO: 
+# Add Queue handling (the queue currently holds only the newest copied URL) and plays it after the EOF
+# Find a smarter way to call notify()
+# use dbus-send instead of notify-send (if possible) || create our own lil C program that will issue a notification
+# using glibc d-bus library
+# error checking ( if mpv failed to play the URL )
+# convert duration of video without using python :P
+
+PROG_NAME="PLY"
+START_MSG="Started, waiting for URLs"
+EXIT_MSG="PLY has exited"
+mpvargs=("--hwdec=no" "--no-config" "--no-video" "--no-terminal")
+MPV_LOADING_DELAY="60" #update this it may take less or more in your PC depending on your internet speed and PC specs
+mpvquality=("--ytdl-format=bestaudio[ext=m4a]")
+TIME="date +%H:%M:%S"
+
+# do not use /tmp/* as your $working_dir if there is multiple users in your system, unless you adjust the files 
+# permissions, RCE can be achieved via the IPC commands
+working_dir="$HOME/.ply" # ~ does not expand, we use $HOME instead 
+[ ! -d $working_dir ] && mkdir $working_dir
+
+videostatus="$working_dir/vstatus"
+socket_file="$working_dir/mpvsocket"
+
+touch $videostatus
+
+IS_VIDEO_ENDED='{ "command": ["get_property", "eof-reached"] }'
+GET_VIDEO_TITLE='{ "command": ["get_property", "media-title"] }'
+GET_VIEDO_DURATION='{ "command": ["get_property", "duration"] }'
+STOP_PLAYING='{ "command": ["quit"]}'
+
+playing=0 && is_playlist=0
+
+trap "clear_all $EXIT_MSG; exit 0" INT TERM # register a handler for INT (^C) and TERM (kill) signals
+					    # that will kill subprocesses and clear files before exiting
+					  
+sleep 1 && notify-send $PROG_NAME "${START_MSG[@]}"
+					  
+function play_music() {
+	# It gives you 5 seconds to undo the copy if it is not unintended (copy something else that is not a URL)
+	sleep 5
+	old_url=$current_url
+	current_url=$(xclip -selection clipboard -o)
+
+	# if mpv is playing a playlist check if it started a new title
+	[ $(($is_playlist)) -eq 1 ] && notify
+	# only play something else if mpv is not playing anything
+	[[ $(($playing)) == 1 ]] || [ "$current_url" == "$old_url" ] && return 
+	case "$current_url" in
+		*http*youtube*) true ;;
+		*http*youtu.be*) true ;;
+		*) return ;;
+	esac
+
+	check_if_playlist $current_url
+	mpv "${mpvargs[@]}" "${mpvquality[@]}" "$current_url" -input-ipc-server=$socket_file &
+	playing=1 && cleared=0
+	sleep $(($MPV_LOADING_DELAY))
+	notify
+	log_status
+}
+
+function notify() {
+	old_title=$current_title
+	current_title=`echo $GET_VIDEO_TITLE | socat - $socket_file | jq '.data'`
+
+	# if the video is not loaded yet, it returns only the ID of the video/playlist, so we wait
+	[[ $current_title == *"watch?v="* ]] || [[ $current_title == *"playlist?list="* ]] && \
+	sleep 2 && notify && return
+	[[ $old_title == $current_title ]] || [[ -z $current_title ]] && return
+	notify-send $PROG_NAME "Now Playing: $current_title"
+	log_status "log_new_entry"
+
+}
+
+function check_if_playlist() {
+	url=$1 && is_playlist=0
+	
+	case $url in 
+		*list=*) true;;
+		*) return;;
+	esac
+	is_playlist=1
+}
+
+function log_status() {
+	if [ -z "$1" ]; then # playing a new URL
+		[ $(($is_playlist)) -eq 1 ] && echo "Playlist : true" > $videostatus && \
+		echo "[$($TIME)] Loading the playlist" >> $videostatus || \
+		echo "[$($TIME)] Video : true" > $videostatus && \
+		echo "[$($TIME)] Loading the video" >> $videostatus
+	fi
+	
+	# bash needs goto and labels :^)
+	duration_of_video=`echo $GET_VIEDO_DURATION | socat - $socket_file | jq ".data"`
+	# in case mpv is still loading and we got nothing
+	duration_of_video=`python2 -c "import datetime; print(str(datetime.timedelta(seconds=int($duration_of_video))))" 2>/dev/null`
+	[ -z "$duration_of_video" ] && log_status "try_again" && return
+	echo -e "[$($TIME)] Now Playing: $current_title \t Duration: [$duration_of_video]" >> $videostatus
+}
+
+function check_if_eof() {
+	
+	if [[ $(($is_playlist)) -eq 0  ]]; then
+		reached_eof=`echo $IS_VIDEO_ENDED | nc -q 1 -U $socket_file 2>/dev/null | jq '.data'`
+		[[ "$reached_eof" != "false" ]] && clear_all 
+		return
+	fi
+	
+	reached_eof=`echo $IS_VIDEO_ENDED | nc -q 1 -U $socket_file >/dev/null 2>&1 && echo 0 || echo 1`
+	[[ $(($reached_eof)) -eq 1 ]] && clear_all
+}
+
+function clear_all() {
+	# if we are exiting stop mpv, delete the socket and update the temp files
+	# otherways just echo "EOF" to the files (End Of File)
+	[ -z "$1" ] && msg="EOF" || msg=$@ && echo $STOP_PLAYING | nc -U $socket_file >/dev/null 2>&1 && rm $socket_file
+	echo "[$($TIME)] "$msg | tee -a $videostatus >/dev/null 2>&1
+	playing=0 && cleared=1
+	notify-send $PROG_NAME "${msg[@]}"
+} 
+
+
+while (true)
+do
+	[ ! -z "$cleared" ] && [ $(($cleared)) -eq 0 ] && [ $(($playing)) -eq 1 ] && check_if_eof
+	play_music
+done

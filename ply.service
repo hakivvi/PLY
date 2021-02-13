@@ -1,0 +1,9 @@
+[Unit]
+Description=PLY service, monitors your clipboard and play Youtube urls if any is found
+
+[Service]
+ExecStart=/usr/local/bin/ply
+ExecStop=kill $(systemctl --user show --property MainPID --value ply.service)
+
+[Install]
+WantedBy=multi-user.target
