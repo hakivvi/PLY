@@ -29,6 +29,6 @@ then:
 # Usage:
 run or install PLY then just copy URL of a youtube video / playlist.
 
-PLY will take the URL and check if it is a valid Youtube URL, if so it will play it using mpv, and will send a notification that contains the name of the video, if the video reached its end it will send a notification telling you that the video is ended, and it will play the new URL that is on the clipboard again.
+PLY will take the URL and check if it is a valid Youtube URL, if so it will play it using mpv, and will send a notification that contains the name of the video, if the video reached its end it will send a notification telling you that the video is ended, and it will play the new URL that is on the clipboard (loop).
 
 if the URL is a playlist it will send a notification every time mpv starts a new video (this is the main reason i created this script for), once it recieves a INT (^C) or TERM (kill) SIGNALL it will first stop mpv (and thus its subprocesses) do some cleanup then it will exit.
