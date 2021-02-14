@@ -127,7 +127,7 @@ function check_if_eof() {
 
 function clear_all() {
 	# if we are exiting stop mpv, delete the socket and update the temp files
-	# otherways just echo "EOF" to the files (End Of File)
+	# otherwise just echo "EOF" to the files (End Of File)
 	[ -z "$1" ] && msg="EOF" || msg=$@ && echo $STOP_PLAYING | nc -U $socket_file >/dev/null 2>&1 && rm $socket_file
 	echo "[$($TIME)] "$msg | tee -a $videostatus >/dev/null 2>&1
 	playing=0 && cleared=1
