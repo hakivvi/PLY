@@ -154,6 +154,8 @@ dbus_bool_t build_message(DBusMessage* message, char *app_name, char *summary, c
 	success &= dbus_message_iter_close_container(&iterators[1], &iterators[2]);
 	success &= dbus_message_iter_close_container(&iterators[0], &iterators[1]);
 	success &= dbus_message_iter_close_container(&arguments, &iterators[0]); 
+	
+	// append timeout basic parameter
 	success &= dbus_message_iter_append_basic(&arguments, DBUS_TYPE_INT32, &timeout);
 
 	return success;
