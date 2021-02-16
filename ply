@@ -9,7 +9,7 @@
 # when it runs in the background, the output will just shows up and interrupt me even if the script is backgrounded
 
 # to play a youtube video ( in audio mode only, update $mvpargs for other options) just copy its URL
-# mpv already supports other platforms (Vimeo, Twitch, ..) just update what URL the script will allow [line 63]
+# mpv already supports other platforms (Vimeo, Twitch, ..) just update what URL the script will allow [line 71]
 # i only use Youtube thats why i dint include other platforms
 
 # TODO: 
@@ -18,7 +18,7 @@
 # convert duration of video without using python :P => DONE
 # ..
 # Add Queue handling (the queue currently holds only the newest copied URL) and plays it after the EOF
-# Find a smarter way to call notify()
+# Find a smarter way to call notify() or maybe slow down ?
 
 PROG_NAME="PLY"
 START_MSG="<b>Started! waiting for URLs</b>"
