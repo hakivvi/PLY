@@ -150,7 +150,7 @@ dbus_bool_t build_message(DBusMessage* message, char *app_name, char *summary, c
 	success &= dbus_message_iter_close_container(&arguments, &iterators[0]);
 
 	// append hints (dictionary datatype {"key":<"value">})
-	success &= dbus_message_iter_open_container(&arguments, DBUS_TYPE_ARRAY, "{sv}", &iterators[0]); // open a container for dict (string: variant)
+	success &= dbus_message_iter_open_container(&arguments, DBUS_TYPE_ARRAY, "{sv}", &iterators[0]); // open a container for dict {string: variant}
 	
 	success &= dbus_message_iter_open_container(&iterators[0], DBUS_TYPE_DICT_ENTRY, NULL, &iterators[1]); // open a container for the dict entry / key (type: string)
 	success &= dbus_message_iter_append_basic(&iterators[1], DBUS_TYPE_STRING, &hints_key); // append "foo" (string)
