@@ -61,7 +61,7 @@ int main(int argc, char* argv[]) {
 dbus_bool_t check_for_error(char check_type, void * object) {
 	if (check_type == CHECK_IS_ERROR_SET) {
 		if (dbus_error_is_set(&dbus_error)) {
-			fprintf(stderr, "Connection Error: %s\n", dbus_error.message);
+			fprintf(stderr, "Error: %s\n", dbus_error.message);
 			dbus_error_free(&dbus_error);
 			exit(1);
 		}
