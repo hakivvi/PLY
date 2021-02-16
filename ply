@@ -107,9 +107,9 @@ function notify() {
 		
 	# just return if the title is the same
 	[[ "$old_title" = "$current_title" ]] || [ -z "$current_title" ] && return
-
+        
+        invalid_video=0
 	ply-notify $PROG_NAME "Now Playing: <b>${current_title[@]}</b>"
-	invalid_video=0
 	log_status "log_new_entry"
 
 }
