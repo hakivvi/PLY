@@ -111,12 +111,12 @@ dbus_bool_t build_message(DBusMessage* message, char *app_name, char *summary, c
 	DBusMessageIter arguments;
 	DBusMessageIter iterators[3];
 
-	int replaces_id=1337;
-	char *app_icon[]={""};
+	int replaces_id = 1337;
+	char *app_icon[] = {""};
 	char* actions[] = { NULL };
 	char* hints_key = "key";
 	int hints_value = *(int*)"value";
-	int32_t timeout=-1;
+	int32_t timeout = -1;
 
 	dbus_bool_t success = 1;
 	
