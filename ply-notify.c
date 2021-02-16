@@ -2,7 +2,6 @@
 // run: ply-notify "PLY" "PLY has started"
 #include <dbus/dbus.h>
 #include <stdio.h>
-#include <stdint.h>
 #include <stdlib.h>
 
 #define OBJECT "/org/freedesktop/Notifications"
@@ -116,7 +115,7 @@ dbus_bool_t build_message(DBusMessage* message, char *app_name, char *summary, c
 	char* actions[] = { NULL };
 	char* hints_key = "key";
 	int hints_value = *(int*)"value";
-	int32_t timeout = -1;
+	signed int timeout = -1;
 
 	dbus_bool_t success = 1;
 	
