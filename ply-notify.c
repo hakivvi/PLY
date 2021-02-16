@@ -141,13 +141,13 @@ dbus_bool_t build_message(DBusMessage* message, char *app_name, char *summary, c
 	success &= dbus_message_iter_open_container(&arguments, DBUS_TYPE_ARRAY, DBUS_TYPE_STRING_AS_STRING, &iterators[0]);
 	for (int i = 0; actions[i]; i++ )
 		success &= dbus_message_iter_append_basic(&iterators[0], DBUS_TYPE_STRING, &actions[i]);
-	success &= dbus_message_iter_close_container(&arguments,&iterators[0]);
+	success &= dbus_message_iter_close_container(&arguments, &iterators[0]);
 
 	// append hints (dictionary datatype {"key":"value"})
 	success &= dbus_message_iter_open_container(&arguments, DBUS_TYPE_ARRAY, "{sv}", &iterators[0]); // {sv} is the signature for dict type: {String, Variant}
 	success &= dbus_message_iter_open_container(&iterators[0], DBUS_TYPE_DICT_ENTRY, NULL, &iterators[1]); 
-	success &= dbus_message_iter_append_basic(&iterators[1] ,DBUS_TYPE_STRING, &hints_key); // dict entry is the key element in the dict
-	success &= dbus_message_iter_open_container(&iterators[1] ,DBUS_TYPE_VARIANT, DBUS_TYPE_INT32_AS_STRING, &iterators[2]); // next is "value"
+	success &= dbus_message_iter_append_basic(&iterators[1], DBUS_TYPE_STRING, &hints_key); // dict entry is the key element in the dict
+	success &= dbus_message_iter_open_container(&iterators[1], DBUS_TYPE_VARIANT, DBUS_TYPE_INT32_AS_STRING, &iterators[2]); // next is "value"
 	success &= dbus_message_iter_append_basic(&iterators[2], DBUS_TYPE_INT32, &hints_value);
 	success &= dbus_message_iter_close_container(&iterators[1], &iterators[2]);
 	success &= dbus_message_iter_close_container(&iterators[0], &iterators[1]);
