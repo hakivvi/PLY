@@ -105,7 +105,7 @@ dbus_bool_t build_message(DBusMessage* message, char *app_name, char *summary, c
 	    ARRAY actions, 
 	    DICT hints, 
 	    INT32 expire_timeout
-		);
+        );
 	*/
 	
 	DBusMessageIter arguments;
