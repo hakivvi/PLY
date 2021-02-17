@@ -14,15 +14,11 @@
 #define INTERFACE "org.freedesktop.Notifications"
 #define METHOD "Notify"
 
-#define CHECK_IS_ERROR_SET 0xB
-#define CHECK_CONNECTION 0xC
-#define CHECK_IS_MSG_BUILT 0xE
-#define CHECK_IS_MSG_SENT 0xD
 
 DBusError dbus_error; // error object/stucture
 
 dbus_bool_t build_message(DBusMessage*, char *, char *, char * );
-dbus_bool_t check_for_error(char, void *);
+void print_error_and_exit();
 
 int main(int argc, char* argv[]) {
 	int name; // our name on the BUS
@@ -32,15 +28,18 @@ int main(int argc, char* argv[]) {
 	dbus_error_init(&dbus_error); // init the error object
 	
         dbus_connection = dbus_bus_get(DBUS_BUS_SESSION, &dbus_error); // connect to the session bus
-        check_for_error(CHECK_CONNECTION, (void *)dbus_connection);
+        if (!dbus_connection)
+        	print_error_and_exit();
 
 	name = dbus_bus_request_name(dbus_connection, "io.ply.callyou", DBUS_NAME_FLAG_REPLACE_EXISTING, &dbus_error);
-	check_for_error( CHECK_IS_ERROR_SET, (void*)&dbus_error );
+	if (!name)
+		print_error_and_exit();
 
 
 	dbus_message = dbus_message_new_method_call(NULL, OBJECT, INTERFACE, METHOD);
-	check_for_error(CHECK_IS_MSG_BUILT, dbus_message);
-
+	if (!dbus_message)
+		print_error_and_exit();
+	
 	dbus_message_set_destination(dbus_message, INTERFACE);
 
 	if ( !build_message(dbus_message, argv[1], argv[1], argv[2]) ) {
@@ -48,55 +47,21 @@ int main(int argc, char* argv[]) {
 		return 1;
 	}
 
-	check_for_error(CHECK_IS_MSG_BUILT, dbus_message);
+	if (!dbus_message)
+		print_error_and_exit();
 
 	// send message and block until reply (for a default timeout)
 	// i could use dbus_pending_call_set_notify() with a callback but :P
 	// dbus_message holds now the reply (NULL for error)
 	dbus_message = dbus_connection_send_with_reply_and_block(dbus_connection, dbus_message, -1, &dbus_error);
-	check_for_error(CHECK_IS_MSG_SENT, dbus_message);
+	if (!dbus_message)
+		print_error_and_exit();
 
  	// unref and return
 	dbus_message_unref(dbus_message);
 	dbus_connection_unref(dbus_connection);
 	return 0;
 } 
-
-
-dbus_bool_t check_for_error(char check_type, void * object) {
-	if (check_type == CHECK_IS_ERROR_SET) {
-		if (dbus_error_is_set(&dbus_error)) {
-			fprintf(stderr, "Error: %s\n", dbus_error.message);
-			dbus_error_free(&dbus_error); // free and re-init
-			exit(1);
-		}
-		return 0;
-
-	}  else if (check_type == CHECK_CONNECTION) {
-		object = (DBusConnection *)object;
-		if (!object) {
-                        check_for_error(CHECK_IS_ERROR_SET, (void *)&dbus_error);
-			exit(1);
-		}
-                return 0;
-
-   	}  else if (check_type == CHECK_IS_MSG_BUILT) {
-      		object = (DBusMessage *)object;
-      		if(!object)
-         		exit(1);
-      		return 0;
-
-	}  else if (check_type == CHECK_IS_MSG_SENT) {
-		object = (DBusMessage *)object;
-		if (!object) {
-			check_for_error(CHECK_IS_ERROR_SET, (void *)&dbus_error);
-			exit(1);
-		}
-      		return 0;
- 	}
-	return 1; 
-}
-
 
 dbus_bool_t build_message(DBusMessage* message, char *app_name, char *summary, char *body) {
 	/*
@@ -167,4 +132,14 @@ dbus_bool_t build_message(DBusMessage* message, char *app_name, char *summary, c
 	success &= dbus_message_iter_append_basic(&arguments, DBUS_TYPE_INT32, &timeout);
 
 	return success;
+}
+
+void print_error_and_exit() {
+	if (dbus_error_is_set(&dbus_error)) {
+		fprintf(stderr, "Error: %s\n", dbus_error.message);
+		dbus_error_free(&dbus_error); // free and re-init
+		exit(1);
+	}
+	fprintf(stderr, "Unknown error occured\n");
+	exit(1);
 }
