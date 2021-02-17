@@ -30,9 +30,9 @@ int main(int argc, char* argv[]) {
 	DBusConnection * dbus_connection; // DBUS connection object
 
 	dbus_error_init(&dbus_error); // init the error object
-	dbus_connection = dbus_bus_get(DBUS_BUS_SESSION, &dbus_error); // connect to the session bus
-
-	check_for_error(CHECK_CONNECTION, (void *)dbus_connection);
+	
+        dbus_connection = dbus_bus_get(DBUS_BUS_SESSION, &dbus_error); // connect to the session bus
+        check_for_error(CHECK_CONNECTION, (void *)dbus_connection);
 
 	name = dbus_bus_request_name(dbus_connection, "io.ply.callyou", DBUS_NAME_FLAG_REPLACE_EXISTING, &dbus_error);
 	check_for_error( CHECK_IS_ERROR_SET, (void*)&dbus_error );
@@ -53,7 +53,6 @@ int main(int argc, char* argv[]) {
 	// send message and block until reply (for a default timeout)
 	// i could use dbus_pending_call_set_notify() with a callback but :P
 	// dbus_message holds now the reply (NULL for error)
-	dbus_error_init(&dbus_error);
 	dbus_message = dbus_connection_send_with_reply_and_block(dbus_connection, dbus_message, -1, &dbus_error);
 	check_for_error(CHECK_IS_MSG_SENT, dbus_message);
 
@@ -68,16 +67,18 @@ dbus_bool_t check_for_error(char check_type, void * object) {
 	if (check_type == CHECK_IS_ERROR_SET) {
 		if (dbus_error_is_set(&dbus_error)) {
 			fprintf(stderr, "Error: %s\n", dbus_error.message);
-			dbus_error_free(&dbus_error);
+			dbus_error_free(&dbus_error); // free and re-init
 			exit(1);
 		}
 		return 0;
 
 	}  else if (check_type == CHECK_CONNECTION) {
 		object = (DBusConnection *)object;
-		if (!object)
+		if (!object) {
+                        check_for_error(CHECK_IS_ERROR_SET, (void *)&dbus_error);
 			exit(1);
-		return 0;
+		}
+                return 0;
 
    	}  else if (check_type == CHECK_IS_MSG_BUILT) {
       		object = (DBusMessage *)object;
