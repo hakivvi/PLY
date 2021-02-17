@@ -37,6 +37,6 @@ PLY will take the URL and check if it is a valid Youtube URL, if so it will play
 
 if the URL is a playlist it will send a notification every time mpv starts a new video (this is the main reason i created this script for), once it recieves a INT (^C) or TERM (kill) SIGNALL it will first stop mpv (and thus its subprocesses) do some cleanup then it will exit.
 
-Added: Error checking, if mpv is not started, or if a video in the playlist is a `[Deleted video]`
+Added: Error checking, if mpv failed to start, or if a video in the playlist is a `[Deleted video]`
 
 Added: Using our custom binary to send notification to the desktop using DBUS plain C library instead of `notify-send`.
