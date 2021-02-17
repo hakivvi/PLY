@@ -106,7 +106,7 @@ dbus_bool_t build_message(DBusMessage* message, char *app_name, char *summary, c
    
 	// D-BUS docs:
 	// To append variable-length basic types, or any more complex value, 
-	// you have to use an iterator rather than dbus_message_iter_append_basic()
+	// you have to use an iterator.
 
 	// So here we go:
 	// append actions[] (array of strings) :
