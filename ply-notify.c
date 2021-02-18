@@ -42,9 +42,11 @@ int main(int argc, char* argv[]) {
 	
 	dbus_message_set_destination(dbus_message, INTERFACE);
 
-	if ( !build_message(dbus_message, argv[1], argv[1], argv[2]) )
+	if ( !build_message(dbus_message, argv[1], argv[1], argv[2]) ) {
 		fprintf(stderr, "Error while building message: Out Of Memory");
-	if (!dbus_message)
+                return 1;
+	}
+        if (!dbus_message)
 		print_error_and_exit();
 
 	// send message and block until reply (for a default timeout)
