@@ -9,7 +9,7 @@
 # when it runs in the background, the output will just shows up and interrupt me even if the script is backgrounded
 
 # to play a youtube video ( in audio mode only, update $mvpargs for other options) just copy its URL
-# mpv already supports other platforms (Vimeo, Twitch, ..) just update what URL the script will allow [line 71]
+# mpv already supports other platforms (Vimeo, Twitch, ..) just update what URL the script will allow [line 63]
 # i only use Youtube thats why i dint include other platforms
 
 # TODO: 
@@ -18,7 +18,7 @@
 # convert duration of video without using python :P => DONE
 # ..
 # Add Queue handling (the queue currently holds only the newest copied URL) and plays it after the EOF
-# Find a smarter way to call notify() or maybe slow down ?
+# Find a smarter way to call notify()
 
 PROG_NAME="PLY"
 START_MSG="<b>Started! waiting for URLs</b>"
@@ -61,7 +61,6 @@ function play_music() {
 		
 	old_url=$current_url
 	current_url=$(xclip -selection clipboard -o)
-
 	# if mpv is playing a playlist check if it started a new title
 	[ $(($is_playlist)) -eq 1 ] && notify
 
@@ -74,8 +73,7 @@ function play_music() {
 		*) return ;;
 	esac
 
-	check_if_playlist $current_url
-	
+	check_if_playlist $current_url	
 	ply-notify $PROG_NAME "${START_PLAYING_MSG[@]}"
 	
 	mpv "${mpvargs[@]}" "${mpvquality[@]}" -input-ipc-server=$socket_file "$current_url" &
@@ -93,9 +91,9 @@ function play_music() {
 }
 
 function notify() {
-
 	old_title=$current_title
 	current_title=`echo $GET_VIDEO_TITLE | socat - $socket_file | jq '.data'`
+	
 
 	# if the video is not loaded yet, it returns only the ID of the video/playlist, so we wait
 	[[ "$current_title" = *"watch?v="* ]] || [[ "$current_title" = *"playlist?list="* ]] && \
@@ -107,16 +105,15 @@ function notify() {
 		
 	# just return if the title is the same
 	[[ "$old_title" = "$current_title" ]] || [ -z "$current_title" ] && return
-        
-        invalid_video=0
+
 	ply-notify $PROG_NAME "Now Playing: <b>${current_title[@]}</b>"
-	log_status "log_new_entry"
+	invalid_video=0
+	[ $(($is_playlist)) -eq 1 ] && log_status "log_new_title_started"
 
 }
 
 function check_if_playlist() {
-	url=$1 && is_playlist=0
-	
+	url=$1 && is_playlist=0	
 	case $url in 
 		*list=*) true;;
 		*) return;;
@@ -141,7 +138,6 @@ function check_if_mpv_failed() {
 }
 
 function log_status() {
-	
 	if [ -z "$1" ]; then # playing a new URL
 		if [ $(($is_playlist)) -eq 1 ]; then
 			echo "[!] Playlist : true" >> $videostatus
@@ -160,8 +156,7 @@ function log_status() {
 	fi
 	
 	# bash needs goto and labels :^)
-	duration_of_video=`echo $GET_VIEDO_DURATION | socat - $socket_file | jq ".data"`
-	
+	duration_of_video=`echo $GET_VIEDO_DURATION | socat - $socket_file | jq ".data"`	
 	# in case mpv is still loading and we got nothing
 	[ -z "$duration_of_video" ] || [[ "$duration_of_video" = "null" ]] && log_status "try_again" && return
 	
@@ -169,7 +164,6 @@ function log_status() {
 	duration_of_video=`printf "%d" "$duration_of_video" 2>/dev/null`
 	# duration of video from seconds to a time format [HH:MM:SS]
 	duration_of_video=`i=$duration_of_video; date -u -d @\${i} +"%T"`
-	
 	echo -e "[$($TIME)] Now Playing: $current_title \t Duration: [$duration_of_video]" >> $videostatus
 }
 
@@ -186,7 +180,6 @@ function check_if_eof() {
 }
 
 function clear_all() {
-
 	# if we are exiting stop mpv, delete the socket and update the temp files
 	# otherwise just echo "EOF" (End Of File) and update the flag
 	
@@ -208,5 +201,5 @@ do
 	
 	# monitor clipboard and play music
 	play_music
-
 done
+
