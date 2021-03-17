@@ -27,6 +27,7 @@ user@local:~$ make install
 ```
 
 **OR as a binary:**
+
 first run make to move PLY to the bin directory
 
 ```
