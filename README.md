@@ -4,32 +4,46 @@ PLY a script that monitors your clipboard and uses mpv to play playlists and vid
 # Install:
 Clone the repo:
 
-`git clone https://github.com/hakivvi/PLY.git`
+```
+user@local:~$ git clone https://github.com/hakivvi/PLY.git
+```
 
 Install dependencies
 
-`cd PLY && make install-deps`
+```
+user@local:~$ cd PLY && make install-deps
+```
 
-then compile ply-notify:
+then compile `ply-notify` and `ply-cp`:
 
-`gcc ply-notify.c $(pkg-config --libs --cflags dbus-1) -o ply-notify`
+```
+user@local:~$ gcc ply-notify.c $(pkg-config --libs --cflags dbus-1) -o ply-notify
+user@local:~$ gcc ply-notify.c ply-cp.c -o ply-cp -lX11
+```
+**Install PLY as a service (auto-start after booting):**
 
-**Install PLY (auto-start after booting):**
+```
+user@local:~$ make install
+```
 
-`make install`
+**OR as a binary:**
+first run make to move PLY to the bin directory
 
-**OR Run PLY:**
-
-`make run`
+```
+user@local:~$ make run
+```
 
 then:
 
-`ply-start` to start PLY
-
-`ply-stop` to stop PLY
+```
+user@local:~$ ply-start #to start PLY
+user@local:~$ ply-stop` #to stop PLY
+```
 
 # Uninstall:
-`make uninstall`
+```
+user@local:~$ make uninstall
+```
 # Usage:
 run or install PLY then just copy URL of a youtube video / playlist.
 
