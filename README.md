@@ -40,3 +40,5 @@ if the URL is a playlist it will send a notification every time mpv starts a new
 Added: Error checking, if mpv failed to start, or if a video in the playlist is a `[Deleted video]`
 
 Added: Using our custom binary to send notification to the desktop using DBUS plain C library instead of `notify-send`.
+
+Added: Using our custom binary to read clipboard content using Xlib, instead of using `xclip`
