@@ -60,7 +60,7 @@ function play_music() {
 	sleep 5
 		
 	old_url=$current_url
-	current_url=$(xclip -selection clipboard -o)
+	current_url=$(ply-cp)
 	# if mpv is playing a playlist check if it started a new title
 	[ $(($is_playlist)) -eq 1 ] && notify
 
