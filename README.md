@@ -17,8 +17,8 @@ user@local:~$ cd PLY && make install-deps
 then compile `ply-notify` and `ply-cp`:
 
 ```
-user@local:~$ gcc ply-notify.c $(pkg-config --libs --cflags dbus-1) -o ply-notify
-user@local:~$ gcc ply-notify.c ply-cp.c -o ply-cp -lX11
+user@local:~$ gcc ply-notify.c -o ply-notify $(pkg-config --libs --cflags dbus-1)
+user@local:~$ gcc ply-cp.c -o ply-cp -lX11
 ```
 **Install PLY as a service (auto-start after booting):**
 
