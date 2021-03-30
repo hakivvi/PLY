@@ -38,7 +38,7 @@ then:
 
 ```
 user@local:~$ ply-start #to start PLY
-user@local:~$ ply-stop` #to stop PLY
+user@local:~$ ply-stop #to stop PLY
 ```
 
 # Uninstall:
