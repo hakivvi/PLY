@@ -132,7 +132,7 @@ function check_if_mpv_failed() {
 		ply-notify $PROG_NAME "${MPV_FAILED_MSG[@]}"
 		playing=0
 		invalid_video=1
-		echo "|$current_url| is an invlid URL, make sure it's not a private nor a deleted video" > $videostatus
+		echo "|$current_url| is an invlid URL, make sure it's not a private nor a deleted video" >> $videostatus
 		return
 	fi
 }
